@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 168996a07cb34799bb2cd0038bf32c79, type: 3}
+  m_Name: double street 4_5_6_7_8_9
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementSO
+  pattern: double street
+  payout: 5
+  bindings:
+  - {fileID: 11400000, guid: ebfce53c97966a041b5eb960ae6bf730, type: 2}
+  - {fileID: 11400000, guid: 61d1b5f54dac12348987eeb3fa005282, type: 2}
+  - {fileID: 11400000, guid: 0dc6f1c8790556a45ad8c84fc33efeee, type: 2}
+  - {fileID: 11400000, guid: bf743a0718e32a849aaa92474085c5e4, type: 2}
+  - {fileID: 11400000, guid: 4957534ea994b6549b5f84fa322a8294, type: 2}
+  - {fileID: 11400000, guid: 575ece696c836fa428586c664c82a4df, type: 2}

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 168996a07cb34799bb2cd0038bf32c79, type: 3}
+  m_Name: corner 11_12_14_15
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementSO
+  pattern: corner
+  payout: 8
+  bindings:
+  - {fileID: 11400000, guid: 3ef896b1c7be6df45a0600dd4ed6407b, type: 2}
+  - {fileID: 11400000, guid: 5e9a40507ac3c1449a4756c96d13e01b, type: 2}
+  - {fileID: 11400000, guid: 897e8c604e5f5e542a6bcdf956975089, type: 2}
+  - {fileID: 11400000, guid: c289df5f6ca5f894ba5ffbc32edb357c, type: 2}
