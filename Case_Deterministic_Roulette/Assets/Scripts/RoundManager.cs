@@ -1,0 +1,177 @@
+using System.Collections;
+using System.Linq;
+using Data;
+using Events;
+using Helpers;
+using UnityEngine;
+using Random = UnityEngine.Random;
+
+public class RoundManager : MonoBehaviour
+{
+    [SerializeField] private NumberSO[] numbers;
+
+    private readonly BoardRound _boardRound = new();
+
+    private void OnGetBoardRound(Event_OnGetBoardRound obj)
+    {
+        obj.OnGetAction?.Invoke(_boardRound);
+    }
+
+    private void OnPlacementClicked(Event_OnPlacementClicked obj)
+    {
+        var placedBetsOnPlacement = _boardRound.PlacedBets
+            .Where(x => x.Placement == obj.Placement)
+            .Sum(y => y.PlacedChip.Amount);
+
+        var newBet = new PlacedBet(obj.Placement, _boardRound.CurrentChipToPlace);
+
+        _boardRound.PlacedBets.Add(newBet);
+
+        _boardRound.TotalBetAmount += _boardRound.CurrentChipToPlace.Amount;
+
+        EventBus<Event_OnPlacedBet>.Publish(new Event_OnPlacedBet(newBet,
+            placedBetsOnPlacement + _boardRound.CurrentChipToPlace.Amount));
+
+        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+    }
+
+    private void OnChipSelected(Event_OnChipSelected obj)
+    {
+        _boardRound.CurrentChipToPlace = obj.PlacedChip;
+
+        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+    }
+
+    private void OnSpinButtonClicked(Event_OnSpinButtonClicked obj)
+    {
+        if (_boardRound.PlacedBets.Count <= 0) return;
+
+        var result = Random.Range(0, 37);
+
+        var numberSo = numbers.ElementAtOrDefault(result);
+
+        if (numberSo == null)
+        {
+            Debug.LogError($"Number with index {result} not found");
+            return;
+        }
+
+        _boardRound.WinningNumber = numberSo;
+
+        StartCoroutine(MockGameStates());
+
+        return;
+
+        IEnumerator MockGameStates()
+        {
+            EventBus<Event_OnSpinStarted>.Publish(new Event_OnSpinStarted(numberSo));
+
+            yield return new WaitForSeconds(2f);
+
+            EventBus<Event_OnSpinEnded>.Publish(new Event_OnSpinEnded(numberSo));
+
+            yield return new WaitForSeconds(2f);
+
+            EventBus<Event_OnReset>.Publish(new Event_OnReset());
+        }
+    }
+
+    private void OnUndoBetButtonClicked(Event_OnUndoBetButtonClicked obj)
+    {
+        if (_boardRound.PlacedBets.Count <= 0) return;
+
+        var lastBet = _boardRound.PlacedBets.Last();
+
+        _boardRound.TotalBetAmount -= lastBet.PlacedChip.Amount;
+
+        _boardRound.PlacedBets.Remove(lastBet);
+
+        var placedBetsOnPlacement = _boardRound.PlacedBets
+            .Where(x => x.Placement == lastBet.Placement)
+            .Sum(y => y.PlacedChip.Amount);
+
+        EventBus<Event_OnUndoBet>.Publish(new Event_OnUndoBet(lastBet, placedBetsOnPlacement));
+        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+    }
+
+    private void OnClearBetButtonClicked(Event_OnClearBetButtonClicked obj)
+    {
+        var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
+
+        _boardRound.TotalBetAmount = 0;
+        _boardRound.PlacedBets.Clear();
+
+        EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
+        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+    }
+
+    private void OnRepeatBetButtonClicked(Event_OnRepeatBetButtonClicked obj)
+    {
+        if (!_boardRound.HasPreviousBet) return;
+
+        if (_boardRound.PlacedBets.Count > 0)
+        {
+            var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
+
+            _boardRound.TotalBetAmount = 0;
+            _boardRound.PlacedBets.Clear();
+
+            EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
+        }
+
+        _boardRound.PlacedBets = _boardRound.PreviousPlacedBets.GroupBy(x => x.Placement)
+            .Select(y =>
+                new PlacedBet(y.Key, new PlacedChip(y.Last().PlacedChip.Chip, y.Sum(z => z.PlacedChip.Amount))))
+            .ToList();
+
+        _boardRound.TotalBetAmount = _boardRound.PlacedBets.Sum(x => x.PlacedChip.Amount);
+
+        EventBus<Event_OnRepeatedBet>.Publish(new Event_OnRepeatedBet(_boardRound.PlacedBets.ToArray()));
+        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+    }
+
+    private void OnReset(Event_OnReset obj)
+    {
+        if (_boardRound.PlacedBets.Count <= 0) return;
+
+        _boardRound.PreviousPlacedBets = _boardRound.PlacedBets.ToList();
+        var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
+
+        _boardRound.TotalBetAmount = 0;
+        _boardRound.PlacedBets.Clear();
+
+        EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
+        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+    }
+
+    private void OnEnable()
+    {
+        EventBus<Event_OnGetBoardRound>.Subscribe(OnGetBoardRound);
+        EventBus<Event_OnPlacementClicked>.Subscribe(OnPlacementClicked);
+        EventBus<Event_OnChipSelected>.Subscribe(OnChipSelected);
+        EventBus<Event_OnSpinButtonClicked>.Subscribe(OnSpinButtonClicked);
+        EventBus<Event_OnUndoBetButtonClicked>.Subscribe(OnUndoBetButtonClicked);
+        EventBus<Event_OnClearBetButtonClicked>.Subscribe(OnClearBetButtonClicked);
+        EventBus<Event_OnRepeatBetButtonClicked>.Subscribe(OnRepeatBetButtonClicked);
+        EventBus<Event_OnReset>.Subscribe(OnReset);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<Event_OnGetBoardRound>.Unsubscribe(OnGetBoardRound);
+        EventBus<Event_OnPlacementClicked>.Unsubscribe(OnPlacementClicked);
+        EventBus<Event_OnChipSelected>.Unsubscribe(OnChipSelected);
+        EventBus<Event_OnSpinButtonClicked>.Unsubscribe(OnSpinButtonClicked);
+        EventBus<Event_OnUndoBetButtonClicked>.Unsubscribe(OnUndoBetButtonClicked);
+        EventBus<Event_OnClearBetButtonClicked>.Unsubscribe(OnClearBetButtonClicked);
+        EventBus<Event_OnRepeatBetButtonClicked>.Unsubscribe(OnRepeatBetButtonClicked);
+        EventBus<Event_OnReset>.Unsubscribe(OnReset);
+    }
+
+    private void OnValidate()
+    {
+        NumberHelper.TryLoadNumberAssets(out var assets);
+
+        numbers = assets.ToArray();
+    }
+}

@@ -1,5 +1,11 @@
 public class PlacedBet
 {
-    public PlacementSO placementData;
-    public int betAmount;
+    public readonly PlacementGO Placement;
+    public readonly PlacedChip PlacedChip;
+
+    public PlacedBet(PlacementGO placement, PlacedChip placedChip)
+    {
+        Placement = placement;
+        PlacedChip = placedChip;
+    }
 }

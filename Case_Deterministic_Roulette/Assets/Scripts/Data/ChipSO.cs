@@ -1,9 +1,11 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ChipSO", menuName = "Scriptable Objects/ChipSO")]
-public class ChipSO : ScriptableObject
+namespace Data
 {
-    public int value;
-    public Color color;
-    public Sprite sprite;
+    [CreateAssetMenu(fileName = "ChipSO", menuName = "Scriptable Objects/ChipSO")]
+    public class ChipSO : ScriptableObject
+    {
+        public Color color;
+        public ChipObject prefab;
+    }
 }
