@@ -10,3 +10,7 @@
 
 "simple low poly casino chips and dices" (https://skfb.ly/oGXrX) by lupas is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
+
+
+<a href="https://www.flaticon.com/free-icons/bet" title="bet icons">Bet icons created by Andrejs Kirma - Flaticon</a>
+
