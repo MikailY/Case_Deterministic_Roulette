@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Events;
@@ -21,6 +20,7 @@ public class SessionManager : MonoBehaviour
             MinAllowedBetAmount = 100,
             MaxAllowedBetAmount = 400,
             MaxAllowedBetAmountTotal = 10000,
+            Statistics = new SessionStatistics(),
             ChipValues = new[]
             {
                 100,
@@ -39,14 +39,9 @@ public class SessionManager : MonoBehaviour
         EventBus<Event_OnSessionInitialized>.Publish(new Event_OnSessionInitialized(_session));
     }
 
-    private void OnEnable()
+    private void OnGetBoardSession(Event_OnGetBoardSession obj)
     {
-        EventBus<Event_OnSpinEnded>.Subscribe(OnSpinEnded);
-    }
-
-    private void OnDisable()
-    {
-        EventBus<Event_OnSpinEnded>.Unsubscribe(OnSpinEnded);
+        obj.OnGetAction?.Invoke(_session);
     }
 
     private void OnSpinEnded(Event_OnSpinEnded obj)
@@ -57,15 +52,41 @@ public class SessionManager : MonoBehaviour
                 .Where(x => x.Key.PlacementData.bindings.Any(y => y == round.WinningNumber));
 
             var winningsAmount = winningPlacements.Sum(winningPlacement =>
-                winningPlacement.Key.PlacementData.payout * winningPlacement.Sum(x => x.PlacedChip.Amount));
+                (winningPlacement.Key.PlacementData.payout + 1) * winningPlacement.Sum(x => x.PlacedChip.Amount));
 
             _session.ChipAmount += winningsAmount - round.TotalBetAmount;
 
             _session.PreviousResults.Insert(0, round.WinningNumber);
-            _session.PreviousResults = _session.PreviousResults.Take(5).ToList();
+            _session.PreviousResults = _session.PreviousResults.Take(10).ToList();
+
+            _session.Statistics.TotalBetAmount += round.TotalBetAmount;
+            _session.Statistics.TotalWin += winningsAmount;
+            _session.Statistics.TotalSpins += 1;
+            if (winningsAmount > _session.Statistics.HighestWin)
+                _session.Statistics.HighestWin = winningsAmount;
+
+            Debug.Log($"STATS;\n" +
+                      $"TotalSpins:{_session.Statistics.TotalSpins}\n" +
+                      $"TotalWin:{_session.Statistics.TotalWin}\n" +
+                      $"TotalBetAmount:{_session.Statistics.TotalBetAmount}\n" +
+                      $"OverallResult:{_session.Statistics.OverallResult}\n" +
+                      $"HighestWin:{_session.Statistics.HighestWin}\n" +
+                      $"");
 
             EventBus<Event_OnSessionUpdated>.Publish(new Event_OnSessionUpdated(_session));
         }));
+    }
+
+    private void OnEnable()
+    {
+        EventBus<Event_OnGetBoardSession>.Subscribe(OnGetBoardSession);
+        EventBus<Event_OnSpinEnded>.Subscribe(OnSpinEnded);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<Event_OnGetBoardSession>.Unsubscribe(OnGetBoardSession);
+        EventBus<Event_OnSpinEnded>.Unsubscribe(OnSpinEnded);
     }
 
     private void OnValidate()

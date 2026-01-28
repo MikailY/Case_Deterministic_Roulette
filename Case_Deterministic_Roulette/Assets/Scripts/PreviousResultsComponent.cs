@@ -2,10 +2,12 @@ using System.Linq;
 using Events;
 using Helpers;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PreviousResultsComponent : MonoBehaviour
 {
     [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private Button statisticsButton;
     [SerializeField] private PreviousResultsComponentWidget[] widgets;
 
     private void OnSessionInitialized(Event_OnSessionInitialized obj)
@@ -44,12 +46,18 @@ public class PreviousResultsComponent : MonoBehaviour
         }
     }
 
+    private void OnStatisticsButtonClicked()
+    {
+        EventBus<Event_OnStatisticsButtonClicked>.Publish(new Event_OnStatisticsButtonClicked());
+    }
+
     private void OnEnable()
     {
         EventBus<Event_OnSessionInitialized>.Subscribe(OnSessionInitialized);
         EventBus<Event_OnSpinStarted>.Subscribe(OnSpinStarted);
         EventBus<Event_OnReset>.Subscribe(OnReset);
         EventBus<Event_OnSessionUpdated>.Subscribe(OnSessionUpdated);
+        statisticsButton.onClick.AddListener(OnStatisticsButtonClicked);
     }
 
     private void OnDisable()
@@ -58,11 +66,13 @@ public class PreviousResultsComponent : MonoBehaviour
         EventBus<Event_OnSpinStarted>.Unsubscribe(OnSpinStarted);
         EventBus<Event_OnReset>.Unsubscribe(OnReset);
         EventBus<Event_OnSessionUpdated>.Unsubscribe(OnSessionUpdated);
+        statisticsButton.onClick.RemoveListener(OnStatisticsButtonClicked);
     }
 
     private void OnValidate()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         widgets = GetComponentsInChildren<PreviousResultsComponentWidget>();
+        statisticsButton = GetComponentInChildren<Button>();
     }
 }
