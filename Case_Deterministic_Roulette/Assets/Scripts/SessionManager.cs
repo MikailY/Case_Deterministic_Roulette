@@ -21,7 +21,6 @@ public class SessionManager : MonoBehaviour
             MinAllowedBetAmount = 100,
             MaxAllowedBetAmount = 400,
             MaxAllowedBetAmountTotal = 10000,
-            PreviousResults = new List<NumberSO> { numbers[Random.Range(0, numbers.Length)] },
             ChipValues = new[]
             {
                 100,
@@ -31,6 +30,11 @@ public class SessionManager : MonoBehaviour
                 2000
             }
         };
+
+        for (var i = 0; i < Random.Range(5, 10); i++)
+        {
+            _session.PreviousResults.Add(numbers[Random.Range(0, numbers.Length)]);
+        }
 
         EventBus<Event_OnSessionInitialized>.Publish(new Event_OnSessionInitialized(_session));
     }
@@ -56,6 +60,9 @@ public class SessionManager : MonoBehaviour
                 winningPlacement.Key.PlacementData.payout * winningPlacement.Sum(x => x.PlacedChip.Amount));
 
             _session.ChipAmount += winningsAmount - round.TotalBetAmount;
+
+            _session.PreviousResults.Insert(0, round.WinningNumber);
+            _session.PreviousResults = _session.PreviousResults.Take(5).ToList();
 
             EventBus<Event_OnSessionUpdated>.Publish(new Event_OnSessionUpdated(_session));
         }));
