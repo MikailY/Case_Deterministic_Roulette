@@ -2380,6 +2380,7 @@ GameObject:
   - component: {fileID: 239084030}
   - component: {fileID: 239084029}
   - component: {fileID: 239084028}
+  - component: {fileID: 239084031}
   m_Layer: 5
   m_Name: component_next_winning_selector
   m_TagString: Untagged
@@ -2419,6 +2420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bd8db9db7a04d87b36011c38c84df5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NextWinningNumberSelectorComponent
+  canvasGroup: {fileID: 0}
   prefab: {fileID: 8898233979273489681, guid: e783f5e917317044da9eec4bed1b68e5, type: 3}
   container: {fileID: 1495265779}
   numbers:
@@ -2497,6 +2499,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 239084026}
   m_CullTransparentMesh: 1
+--- !u!225 &239084031
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239084026}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &252026893
 PrefabInstance:
   m_ObjectHideFlags: 0
