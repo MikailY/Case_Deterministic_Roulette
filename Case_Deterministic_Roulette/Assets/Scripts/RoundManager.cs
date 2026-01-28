@@ -19,20 +19,53 @@ public class RoundManager : MonoBehaviour
 
     private void OnPlacementClicked(Event_OnPlacementClicked obj)
     {
-        var placedBetsOnPlacement = _boardRound.PlacedBets
-            .Where(x => x.Placement == obj.Placement)
-            .Sum(y => y.PlacedChip.Amount);
+        EventBus<Event_OnGetBoardSession>.Publish(new Event_OnGetBoardSession(OnGetSession));
 
-        var newBet = new PlacedBet(obj.Placement, _boardRound.CurrentChipToPlace);
+        return;
 
-        _boardRound.PlacedBets.Add(newBet);
+        void OnGetSession(BoardSession session)
+        {
+            var totalBetAmount = _boardRound.TotalBetAmount + _boardRound.CurrentChipToPlace.Amount;
 
-        _boardRound.TotalBetAmount += _boardRound.CurrentChipToPlace.Amount;
+            if (session.ChipAmount < totalBetAmount)
+            {
+                EventBus<Event_ShowInfoMessage>.Publish(
+                    new Event_ShowInfoMessage("Not enough balance to bet!"));
+                return;
+            }
 
-        EventBus<Event_OnPlacedBet>.Publish(new Event_OnPlacedBet(newBet,
-            placedBetsOnPlacement + _boardRound.CurrentChipToPlace.Amount));
+            if (session.MaxAllowedBetAmountTotal < totalBetAmount)
+            {
+                EventBus<Event_ShowInfoMessage>.Publish(
+                    new Event_ShowInfoMessage(
+                        $"Max allowed total bet amount is {StringHelper.FormatChip(session.MaxAllowedBetAmountTotal)}!"));
+                return;
+            }
 
-        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+            var maxAllowedBetOnPlacement = session.MaxAllowedBetAmount * obj.Placement.PlacementData.bindings.Length;
+            var placedBetsOnPlacement = _boardRound.PlacedBets
+                .Where(x => x.Placement == obj.Placement)
+                .Sum(y => y.PlacedChip.Amount);
+            
+            if (maxAllowedBetOnPlacement < placedBetsOnPlacement + _boardRound.CurrentChipToPlace.Amount)
+            {
+                EventBus<Event_ShowInfoMessage>.Publish(
+                    new Event_ShowInfoMessage(
+                        $"Max allowed bet amount is {StringHelper.FormatChip(maxAllowedBetOnPlacement)}!"));
+                return;
+            }
+
+            var newBet = new PlacedBet(obj.Placement, _boardRound.CurrentChipToPlace);
+
+            _boardRound.PlacedBets.Add(newBet);
+
+            _boardRound.TotalBetAmount = totalBetAmount;
+
+            EventBus<Event_OnPlacedBet>.Publish(new Event_OnPlacedBet(newBet,
+                placedBetsOnPlacement + _boardRound.CurrentChipToPlace.Amount));
+
+            EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+        }
     }
 
     private void OnChipSelected(Event_OnChipSelected obj)
@@ -86,27 +119,44 @@ public class RoundManager : MonoBehaviour
 
     private void OnRepeatBetButtonClicked(Event_OnRepeatBetButtonClicked obj)
     {
-        if (!_boardRound.HasPreviousBet) return;
+        EventBus<Event_OnGetBoardSession>.Publish(new Event_OnGetBoardSession(OnGetSession));
 
-        if (_boardRound.PlacedBets.Count > 0)
+        return;
+
+        void OnGetSession(BoardSession session)
         {
-            var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
+            if (!_boardRound.HasPreviousBet) return;
 
-            _boardRound.TotalBetAmount = 0;
-            _boardRound.PlacedBets.Clear();
+            var betsToPlace = _boardRound.PreviousPlacedBets.GroupBy(x => x.Placement)
+                .Select(y =>
+                    new PlacedBet(y.Key, new PlacedChip(y.Last().PlacedChip.Chip, y.Sum(z => z.PlacedChip.Amount))))
+                .ToList();
 
-            EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
+            var betsToPlaceAmount = betsToPlace.Sum(x => x.PlacedChip.Amount);
+
+            if (betsToPlaceAmount > session.ChipAmount)
+            {
+                EventBus<Event_ShowInfoMessage>.Publish(
+                    new Event_ShowInfoMessage("Not enough balance to repeat previous bet!"));
+                return;
+            }
+
+            if (_boardRound.PlacedBets.Count > 0)
+            {
+                var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
+
+                _boardRound.TotalBetAmount = 0;
+                _boardRound.PlacedBets.Clear();
+
+                EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
+            }
+
+            _boardRound.PlacedBets = betsToPlace;
+            _boardRound.TotalBetAmount = betsToPlaceAmount;
+
+            EventBus<Event_OnRepeatedBet>.Publish(new Event_OnRepeatedBet(_boardRound.PlacedBets.ToArray()));
+            EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
         }
-
-        _boardRound.PlacedBets = _boardRound.PreviousPlacedBets.GroupBy(x => x.Placement)
-            .Select(y =>
-                new PlacedBet(y.Key, new PlacedChip(y.Last().PlacedChip.Chip, y.Sum(z => z.PlacedChip.Amount))))
-            .ToList();
-
-        _boardRound.TotalBetAmount = _boardRound.PlacedBets.Sum(x => x.PlacedChip.Amount);
-
-        EventBus<Event_OnRepeatedBet>.Publish(new Event_OnRepeatedBet(_boardRound.PlacedBets.ToArray()));
-        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
     }
 
     private void OnSpinEnded(Event_OnSpinEnded obj)

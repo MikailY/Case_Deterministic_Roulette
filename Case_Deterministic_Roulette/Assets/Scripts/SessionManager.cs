@@ -65,14 +65,6 @@ public class SessionManager : MonoBehaviour
             if (winningsAmount > _session.Statistics.HighestWin)
                 _session.Statistics.HighestWin = winningsAmount;
 
-            Debug.Log($"STATS;\n" +
-                      $"TotalSpins:{_session.Statistics.TotalSpins}\n" +
-                      $"TotalWin:{_session.Statistics.TotalWin}\n" +
-                      $"TotalBetAmount:{_session.Statistics.TotalBetAmount}\n" +
-                      $"OverallResult:{_session.Statistics.OverallResult}\n" +
-                      $"HighestWin:{_session.Statistics.HighestWin}\n" +
-                      $"");
-
             EventBus<Event_OnSessionUpdated>.Publish(new Event_OnSessionUpdated(_session));
         }));
     }
