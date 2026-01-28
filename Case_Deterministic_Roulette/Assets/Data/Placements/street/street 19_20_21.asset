@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 168996a07cb34799bb2cd0038bf32c79, type: 3}
+  m_Name: street 19_20_21
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementSO
+  payout: 11
+  bindings:
+  - {fileID: 11400000, guid: ec240454d4c87e7499d495d2dfbc59f5, type: 2}
+  - {fileID: 11400000, guid: 49b530e7ea833b6408470444c969d860, type: 2}
+  - {fileID: 11400000, guid: a9faa555314721b4ba95230aac4e877d, type: 2}
