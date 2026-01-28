@@ -46,15 +46,9 @@ public class RoundManager : MonoBehaviour
     {
         if (_boardRound.PlacedBets.Count <= 0) return;
 
-        var result = Random.Range(0, 37);
-
-        var numberSo = numbers.ElementAtOrDefault(result);
-
-        if (numberSo == null)
-        {
-            Debug.LogError($"Number with index {result} not found");
-            return;
-        }
+        var numberSo = _boardRound.NextWinningNumber != null
+            ? _boardRound.NextWinningNumber
+            : numbers.ElementAt(Random.Range(0, 37));
 
         _boardRound.WinningNumber = numberSo;
 
@@ -119,17 +113,6 @@ public class RoundManager : MonoBehaviour
     {
         StartCoroutine(DelayResetForSecond(2));
 
-        if (_boardRound.PlacedBets.Count <= 0) return;
-
-        _boardRound.PreviousPlacedBets = _boardRound.PlacedBets.ToList();
-        var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
-
-        _boardRound.TotalBetAmount = 0;
-        _boardRound.PlacedBets.Clear();
-
-        EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
-        EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
-
         return;
 
         IEnumerator DelayResetForSecond(int delay)
@@ -137,7 +120,24 @@ public class RoundManager : MonoBehaviour
             yield return new WaitForSeconds(delay);
 
             EventBus<Event_OnReset>.Publish(new Event_OnReset());
+
+            if (_boardRound.PlacedBets.Count <= 0) yield return null;
+
+            _boardRound.PreviousPlacedBets = _boardRound.PlacedBets.ToList();
+            var placementsToClear = _boardRound.PlacedBets.GroupBy(x => x.Placement).Select(x => x.Key).ToArray();
+
+            _boardRound.TotalBetAmount = 0;
+            _boardRound.PlacedBets.Clear();
+            _boardRound.NextWinningNumber = null;
+
+            EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
+            EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
         }
+    }
+
+    private void OnNextWinningSelected(Event_OnNextWinningSelected obj)
+    {
+        _boardRound.NextWinningNumber = obj.NextWinningNumber;
     }
 
     private void OnEnable()
@@ -150,6 +150,7 @@ public class RoundManager : MonoBehaviour
         EventBus<Event_OnClearBetButtonClicked>.Subscribe(OnClearBetButtonClicked);
         EventBus<Event_OnRepeatBetButtonClicked>.Subscribe(OnRepeatBetButtonClicked);
         EventBus<Event_OnSpinEnded>.Subscribe(OnSpinEnded);
+        EventBus<Event_OnNextWinningSelected>.Subscribe(OnNextWinningSelected);
     }
 
     private void OnDisable()
@@ -162,6 +163,7 @@ public class RoundManager : MonoBehaviour
         EventBus<Event_OnClearBetButtonClicked>.Unsubscribe(OnClearBetButtonClicked);
         EventBus<Event_OnRepeatBetButtonClicked>.Unsubscribe(OnRepeatBetButtonClicked);
         EventBus<Event_OnSpinEnded>.Unsubscribe(OnSpinEnded);
+        EventBus<Event_OnNextWinningSelected>.Unsubscribe(OnNextWinningSelected);
     }
 
     private void OnValidate()

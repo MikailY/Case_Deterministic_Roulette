@@ -9,5 +9,6 @@ public class BoardRound
     public PlacedChip CurrentChipToPlace { get; set; }
     public int TotalBetAmount { get; set; }
     public NumberSO WinningNumber { get; set; }
+    public NumberSO NextWinningNumber { get; set; }
     public bool HasPreviousBet => PreviousPlacedBets != null && PreviousPlacedBets.Any();
 }
