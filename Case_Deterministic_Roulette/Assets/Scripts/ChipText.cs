@@ -8,6 +8,6 @@ public class ChipText : MonoBehaviour
 
     public void SetText(int amount)
     {
-        text.text = StringHelper.FormatChip(amount);
+        text.text = TextHelper.FormatChip(amount);
     }
 }

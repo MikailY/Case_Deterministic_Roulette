@@ -10,26 +10,28 @@ public class TopBarInfoComponent : MonoBehaviour
     [SerializeField] private TMP_Text minMaxBetText;
 
     private int _balance;
+    private int _totalBetAmount;
 
     private void OnSessionInitialized(Event_OnSessionInitialized obj)
     {
-        _balance = obj.Session.ChipAmount;
-        balanceText.text = $"BALANCE: {StringHelper.FormatChip(_balance)}";
-        totalBetText.text = $"TOTAL BET: {StringHelper.FormatChip(0)}";
+        StartCoroutine(balanceText.TextAnimation(0, obj.Session.ChipAmount, 0.25f, "BALANCE: {0}"));
+        totalBetText.text = $"TOTAL BET: {TextHelper.FormatChip(0)}";
         minMaxBetText.text =
-            $"LIMIT MIN {StringHelper.FormatChip(obj.Session.MinAllowedBetAmount)} / MAX {StringHelper.FormatChip(obj.Session.MaxAllowedBetAmount)}";
+            $"LIMIT MIN {TextHelper.FormatChip(obj.Session.MinAllowedBetAmount)} / MAX {TextHelper.FormatChip(obj.Session.MaxAllowedBetAmount)}";
+        _balance = obj.Session.ChipAmount;
     }
 
     private void OnBoardRoundUpdated(Event_OnBoardRoundUpdated obj)
     {
-        totalBetText.text = $"TOTAL BET: {StringHelper.FormatChip(obj.Data.TotalBetAmount)}";
-        balanceText.text = $"BALANCE: {StringHelper.FormatChip(_balance - obj.Data.TotalBetAmount)}";
+        StartCoroutine(balanceText.TextAnimation(_balance - _totalBetAmount, _balance - obj.Data.TotalBetAmount, 0.25f,
+            "BALANCE: {0}"));
+        StartCoroutine(totalBetText.TextAnimation(_totalBetAmount, obj.Data.TotalBetAmount, 0.25f, "TOTAL BET: {0}"));
+        _totalBetAmount = obj.Data.TotalBetAmount;
     }
 
     private void OnSessionUpdated(Event_OnSessionUpdated obj)
     {
         _balance = obj.Session.ChipAmount;
-        balanceText.text = $"BALANCE: {StringHelper.FormatChip(_balance)}";
     }
 
     private void OnEnable()

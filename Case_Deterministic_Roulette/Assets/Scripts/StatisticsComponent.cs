@@ -17,30 +17,35 @@ public class StatisticsComponent : MonoBehaviour
 
     private void OnStatisticsButtonClicked(Event_OnStatisticsButtonClicked obj)
     {
-        EventBus<Event_OnGetBoardSession>.Publish(new Event_OnGetBoardSession(session =>
+        EventBus<Event_OnGetBoardSession>.Publish(new Event_OnGetBoardSession(OnGetSession));
+
+        return;
+
+        void OnGetSession(BoardSession session)
         {
-            balanceText.text = $"Current balance : {StringHelper.FormatChip(session.ChipAmount)}";
-            totalSpinsText.text = $"Total spins: {session.Statistics.TotalSpins}";
-            totalBetAmountText.text =
-                $"Total bet amount : {StringHelper.FormatChip(session.Statistics.TotalBetAmount)}";
-            totalWinText.text = $"Total bet amount : {StringHelper.FormatChip(session.Statistics.TotalWin)}";
-            highestWinText.text = $"Total bet amount : {StringHelper.FormatChip(session.Statistics.HighestWin)}";
+            StartCoroutine(balanceText.TextAnimation(0, session.ChipAmount, 1f, "Current balance: {0}"));
+            StartCoroutine(totalSpinsText.TextAnimation(0, session.Statistics.TotalSpins, 1f, "Total spins: {0}"));
+            StartCoroutine(totalBetAmountText.TextAnimation(0, session.Statistics.TotalBetAmount, 1f,
+                "Total bet amount: {0}"));
+            StartCoroutine(totalWinText.TextAnimation(0, session.Statistics.TotalWin, 1f, "Total win amount: {0}"));
+            StartCoroutine(highestWinText.TextAnimation(0, session.Statistics.HighestWin, 1f,
+                "Highest win amount: {0}"));
 
             if (session.Statistics.OverallResult < 0)
             {
-                overallResultText.text =
-                    $"Overall result : {StringHelper.FormatChip(-session.Statistics.OverallResult)}";
+                StartCoroutine(overallResultText.TextAnimation(0, -session.Statistics.OverallResult, 1f,
+                    "Overall result: {0}"));
                 overallResultText.color = Color.red;
             }
             else
             {
-                overallResultText.text =
-                    $"Overall result : {StringHelper.FormatChip(session.Statistics.OverallResult)}";
+                StartCoroutine(overallResultText.TextAnimation(0, session.Statistics.OverallResult, 1f,
+                    "Overall result: {0}"));
                 overallResultText.color = Color.green;
             }
 
             canvasGroup.Show();
-        }));
+        }
     }
 
     private void HideButtonClicked()

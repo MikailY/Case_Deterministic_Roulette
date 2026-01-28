@@ -18,7 +18,7 @@ public class ChipSelectorComponentWidget : MonoBehaviour
 
     public void Set(int value)
     {
-        text.text = StringHelper.FormatChip(value);
+        text.text = TextHelper.FormatChip(value);
         
         button.image.color = data.color;
 

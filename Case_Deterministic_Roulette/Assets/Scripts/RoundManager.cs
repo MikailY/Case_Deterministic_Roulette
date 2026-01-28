@@ -38,7 +38,7 @@ public class RoundManager : MonoBehaviour
             {
                 EventBus<Event_ShowInfoMessage>.Publish(
                     new Event_ShowInfoMessage(
-                        $"Max allowed total bet amount is {StringHelper.FormatChip(session.MaxAllowedBetAmountTotal)}!"));
+                        $"Max allowed total bet amount is {TextHelper.FormatChip(session.MaxAllowedBetAmountTotal)}!"));
                 return;
             }
 
@@ -51,7 +51,7 @@ public class RoundManager : MonoBehaviour
             {
                 EventBus<Event_ShowInfoMessage>.Publish(
                     new Event_ShowInfoMessage(
-                        $"Max allowed bet amount is {StringHelper.FormatChip(maxAllowedBetOnPlacement)}!"));
+                        $"Max allowed bet amount is {TextHelper.FormatChip(maxAllowedBetOnPlacement)}!"));
                 return;
             }
 
