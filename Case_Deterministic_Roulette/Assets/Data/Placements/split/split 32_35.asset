@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 168996a07cb34799bb2cd0038bf32c79, type: 3}
+  m_Name: split 32_35
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementSO
+  payout: 17
+  bindings:
+  - {fileID: 11400000, guid: e491e263710bcf04e937b5140f56b300, type: 2}
+  - {fileID: 11400000, guid: e8bdd38b01d74244eb129e3d48507fd8, type: 2}
