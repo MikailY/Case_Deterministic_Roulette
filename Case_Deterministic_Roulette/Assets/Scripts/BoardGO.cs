@@ -45,10 +45,12 @@ public class BoardGO : MonoBehaviour
         }
 
         _isInteractable = true;
-    }
 
-    private void OnSpinEnded(Event_OnSpinEnded obj)
-    {
+        wheelObject.StartBall(obj.Result,
+            () =>
+            {
+                EventBus<Event_OnSpinEnded>.Publish(new Event_OnSpinEnded(obj.Result));
+            });
     }
 
     private void OnReset(Event_OnReset obj)
@@ -85,7 +87,6 @@ public class BoardGO : MonoBehaviour
         PlacementGO.OnExit += PlacementGOOnOnExit;
 
         EventBus<Event_OnSpinStarted>.Subscribe(OnSpinStarted);
-        EventBus<Event_OnSpinEnded>.Subscribe(OnSpinEnded);
         EventBus<Event_OnReset>.Subscribe(OnReset);
         EventBus<Event_OnPlacedBet>.Subscribe(OnPlacedBet);
         EventBus<Event_OnUndoBet>.Subscribe(OnUndoBet);
@@ -100,7 +101,6 @@ public class BoardGO : MonoBehaviour
         PlacementGO.OnExit -= PlacementGOOnOnExit;
 
         EventBus<Event_OnSpinStarted>.Unsubscribe(OnSpinStarted);
-        EventBus<Event_OnSpinEnded>.Unsubscribe(OnSpinEnded);
         EventBus<Event_OnReset>.Unsubscribe(OnReset);
         EventBus<Event_OnPlacedBet>.Unsubscribe(OnPlacedBet);
         EventBus<Event_OnUndoBet>.Unsubscribe(OnUndoBet);

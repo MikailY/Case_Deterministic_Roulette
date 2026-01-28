@@ -28,10 +28,6 @@ public class GameControlsComponent : MonoBehaviour
         canvasGroup.Hide();
     }
 
-    private void OnSpinEnded(Event_OnSpinEnded obj)
-    {
-    }
-
     private void OnReset(Event_OnReset obj)
     {
         canvasGroup.Show();
@@ -75,7 +71,6 @@ public class GameControlsComponent : MonoBehaviour
 
         EventBus<Event_OnSessionInitialized>.Subscribe(OnSessionInitialized);
         EventBus<Event_OnSpinStarted>.Subscribe(OnSpinStarted);
-        EventBus<Event_OnSpinEnded>.Subscribe(OnSpinEnded);
         EventBus<Event_OnReset>.Subscribe(OnReset);
         EventBus<Event_OnBoardRoundUpdated>.Subscribe(OnBoardRoundUpdated);
     }
@@ -89,7 +84,6 @@ public class GameControlsComponent : MonoBehaviour
 
         EventBus<Event_OnSessionInitialized>.Unsubscribe(OnSessionInitialized);
         EventBus<Event_OnSpinStarted>.Unsubscribe(OnSpinStarted);
-        EventBus<Event_OnSpinEnded>.Unsubscribe(OnSpinEnded);
         EventBus<Event_OnReset>.Unsubscribe(OnReset);
         EventBus<Event_OnBoardRoundUpdated>.Unsubscribe(OnBoardRoundUpdated);
     }

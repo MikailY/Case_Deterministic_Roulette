@@ -4,16 +4,31 @@ using UnityEngine;
 public class PocketGO : MonoBehaviour
 {
     [SerializeField] private NumberSO numberData;
+    [SerializeField] private Transform target;
+    [SerializeField] private Transform entryPoint;
+    [SerializeField] private Transform curvePoint;
 
-    private void OnDrawGizmos()
+    public NumberSO NumberData => numberData;
+    public Transform Target => target;
+    public Transform CurvePoint => curvePoint;
+    public Transform EntryPoint => entryPoint;
+
+    // private void OnDrawGizmos()
+    // {
+    //     if (numberData == null) return;
+    //
+    //     Gizmos.color = numberData.color;
+    //
+    //     Gizmos.DrawSphere(target.position, 0.025f);
+    //
+    //     // for (var i = 0; i < transform.childCount; i++)
+    //     // {
+    //     //     Gizmos.DrawSphere(transform.GetChild(i).position, 0.025f);
+    //     // }
+    // }
+
+    private void OnValidate()
     {
-        if (numberData == null) return;
-
-        Gizmos.color = numberData.color;
-
-        for (var i = 0; i < transform.childCount; i++)
-        {
-            Gizmos.DrawSphere(transform.GetChild(i).position, 0.025f);
-        }
+        target = transform.GetChild(1);
     }
 }

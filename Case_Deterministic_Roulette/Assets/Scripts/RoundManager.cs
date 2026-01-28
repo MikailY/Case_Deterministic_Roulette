@@ -58,22 +58,7 @@ public class RoundManager : MonoBehaviour
 
         _boardRound.WinningNumber = numberSo;
 
-        StartCoroutine(MockGameStates());
-
-        return;
-
-        IEnumerator MockGameStates()
-        {
-            EventBus<Event_OnSpinStarted>.Publish(new Event_OnSpinStarted(numberSo));
-
-            yield return new WaitForSeconds(2f);
-
-            EventBus<Event_OnSpinEnded>.Publish(new Event_OnSpinEnded(numberSo));
-
-            yield return new WaitForSeconds(2f);
-
-            EventBus<Event_OnReset>.Publish(new Event_OnReset());
-        }
+        EventBus<Event_OnSpinStarted>.Publish(new Event_OnSpinStarted(numberSo));
     }
 
     private void OnUndoBetButtonClicked(Event_OnUndoBetButtonClicked obj)
@@ -130,8 +115,10 @@ public class RoundManager : MonoBehaviour
         EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
     }
 
-    private void OnReset(Event_OnReset obj)
+    private void OnSpinEnded(Event_OnSpinEnded obj)
     {
+        StartCoroutine(DelayResetForSecond(2));
+
         if (_boardRound.PlacedBets.Count <= 0) return;
 
         _boardRound.PreviousPlacedBets = _boardRound.PlacedBets.ToList();
@@ -142,6 +129,15 @@ public class RoundManager : MonoBehaviour
 
         EventBus<Event_OnClearedBets>.Publish(new Event_OnClearedBets(placementsToClear));
         EventBus<Event_OnBoardRoundUpdated>.Publish(new Event_OnBoardRoundUpdated(_boardRound));
+
+        return;
+
+        IEnumerator DelayResetForSecond(int delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            EventBus<Event_OnReset>.Publish(new Event_OnReset());
+        }
     }
 
     private void OnEnable()
@@ -153,7 +149,7 @@ public class RoundManager : MonoBehaviour
         EventBus<Event_OnUndoBetButtonClicked>.Subscribe(OnUndoBetButtonClicked);
         EventBus<Event_OnClearBetButtonClicked>.Subscribe(OnClearBetButtonClicked);
         EventBus<Event_OnRepeatBetButtonClicked>.Subscribe(OnRepeatBetButtonClicked);
-        EventBus<Event_OnReset>.Subscribe(OnReset);
+        EventBus<Event_OnSpinEnded>.Subscribe(OnSpinEnded);
     }
 
     private void OnDisable()
@@ -165,7 +161,7 @@ public class RoundManager : MonoBehaviour
         EventBus<Event_OnUndoBetButtonClicked>.Unsubscribe(OnUndoBetButtonClicked);
         EventBus<Event_OnClearBetButtonClicked>.Unsubscribe(OnClearBetButtonClicked);
         EventBus<Event_OnRepeatBetButtonClicked>.Unsubscribe(OnRepeatBetButtonClicked);
-        EventBus<Event_OnReset>.Unsubscribe(OnReset);
+        EventBus<Event_OnSpinEnded>.Unsubscribe(OnSpinEnded);
     }
 
     private void OnValidate()

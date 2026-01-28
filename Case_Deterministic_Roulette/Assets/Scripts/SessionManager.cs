@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
@@ -55,8 +54,6 @@ public class SessionManager : MonoBehaviour
 
             var winningsAmount = winningPlacements.Sum(winningPlacement =>
                 winningPlacement.Key.PlacementData.payout * winningPlacement.Sum(x => x.PlacedChip.Amount));
-
-            Debug.LogWarning($"{_session.ChipAmount} += {winningsAmount} - {round.TotalBetAmount}");
 
             _session.ChipAmount += winningsAmount - round.TotalBetAmount;
 
